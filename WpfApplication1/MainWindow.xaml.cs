@@ -91,6 +91,25 @@ namespace WpfApplication1
             return M;
         }
 
+        public List<double[]> MatrixView(Matrix A)
+        { 
+            List<double[]> result = new List<double[]>();
+
+            for (int i = 0; i < A.rows; i++)
+            {
+                double[] row = new double[A.cols];
+
+                for (int j = 0; j < A.cols; j++)
+                {
+                    row[j] = A.values[i, j];
+                }
+
+                result.Add(row);
+            }
+
+            return result;
+        }
+
 
         public MainWindow()
         {
@@ -104,7 +123,23 @@ namespace WpfApplication1
             b.values = new double[3, 1] { { 14 }, { -9 }, { 9 } };
             Matrix L = A.ToLowTr();
             Matrix M = LowTrInverse(L);
-            MessageBox.Show(UpperRelax(A, b, 0.00000001, 1000000).ToString());
+
+            List<double[]> view = MatrixView(A);
+
+            AGrid.AutoGenerateColumns = false;
+
+            for (int i = 0; i < A.cols; i++)
+            {
+                DataGridTextColumn col = new DataGridTextColumn();
+                Binding binding = new Binding("[" + i + "]");
+                col.Binding = binding;
+                col.Header = "x" + (i + 1);
+                AGrid.Columns.Add(col);
+            }
+
+            AGrid.ItemsSource = view;
+
+            //MessageBox.Show(UpperRelax(A, b, 0.00000001, 1000000).ToString());
             //MessageBox.Show(JacobiMethod(A, b, 0.00000001, 1000000).ToString());   
         }
     }

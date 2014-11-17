@@ -4,9 +4,6 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid HorizontalAlignment="Left" Height="320" VerticalAlignment="Top" Width="517">
         <DataGrid x:Name="AGrid" HorizontalAlignment="Left" Margin="88,110,0,0" VerticalAlignment="Top" Height="169" Width="271">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{x:Null}" ClipboardContentBinding="{x:Null}" Header="Blabla"/>
-            </DataGrid.Columns>
         </DataGrid>
     </Grid>
 </Window>

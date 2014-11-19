@@ -20,76 +20,7 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
-        public Matrix JacobiMethod(Matrix A, Matrix b, double e, int maxN)
-        {
-            Matrix x = new Matrix(A.rows, 1);
-            Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();
 
-            Matrix tmp = A.Copy();
-            A = A.Transpose() * A;
-            b = tmp.Transpose() * b;
-            tmp = b.Copy();
-            double t = 2 / (0.79 * A.Norm());
-
-            int i;
-            for (i = 0; i < maxN; i++)
-            {               
-                x = (E - t*A) * tmp + t*b;
-                if ((x - tmp).Norm() < e)
-                    break;
-                tmp = x.Copy();
-            }
-
-            return x;
-        }
-
-
-        public Matrix UpperRelax(Matrix A, Matrix b, double e, int maxN)
-        {
-            Matrix x = new Matrix(A.rows, 1);
-            Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();
-
-            Matrix tmp = A.Copy();
-            A = A.Transpose() * A;
-            b = tmp.Transpose() * b;
-            Matrix M = A.ToLowTr();
-            Matrix MInv = LowTrInverse(M);
-            tmp = x.Copy();
-            double t = 1;
-
-            int i;
-            for (i = 0; i < maxN; i++)
-            {
-                x = (E - t * MInv * A) * tmp + t * MInv * b;
-                if ((x - tmp).Norm() < e)
-                    break;
-                tmp = x.Copy();
-            }
-
-            return x;
-        }
-
-
-        //Обращение нижнетреугольной матрицы. Сделать проверку?
-        public Matrix LowTrInverse(Matrix A)
-        {
-            Matrix M = new Matrix(A.rows, A.cols);
-
-            for (int i = 0; i < A.rows; i++)
-            {
-                M.values[i,i] = 1 / A.values[i, i];
-                for (int j = 0; j < i; j++)
-                {
-                    for (int k = 0; k < i; k++)
-                    {
-                        M.values[i, j] += M.values[k, j] * A.values[i, k];
-                    }
-                    M.values[i, j] *= (-1 / A.values[i, i]);
-                }
-            }
-
-            return M;
-        }
 
         public List<double[]> MatrixView(Matrix A)
         { 
@@ -122,25 +53,54 @@ namespace WpfApplication1
             Matrix b = new Matrix(3, 1);
             b.values = new double[3, 1] { { 14 }, { -9 }, { 9 } };
             Matrix L = A.ToLowTr();
-            Matrix M = LowTrInverse(L);
+            Matrix M = Methods.LowTrInverse(L);
+      
 
-            List<double[]> view = MatrixView(A);
+            //MessageBox.Show(UpperRelax(A, b, 0.00000001, 1000000).ToString());
+            //MessageBox.Show(JacobiMethod(A, b, 0.00000001, 1000000).ToString());   
+        }
 
+        private void SolveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);//Перегнать из гридов в матрицы
+            Matrix b = new Matrix(bGrid.ItemsSource as List<double[]>);//Как насчет оформить валидации?
+
+            Matrix x = Methods.JacobiMethod(A, b, 0.0000001, 1000000);//Решить систему
+            MessageBox.Show(x.ToString());//Вывести ответ
+            MessageBox.Show((A*x).ToString());
+        }
+
+        private void CreateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            int dim = Convert.ToInt32(DimBox.Text);
+            Matrix A = new Matrix(dim, dim);
+            Matrix b = new Matrix(dim, 1);
+
+            A.Randomize(Convert.ToDouble(MinBox.Text), Convert.ToDouble(MaxBox.Text));  //Как насчет оформить валидации?
+            b.Randomize(Convert.ToDouble(MinBox.Text), Convert.ToDouble(MaxBox.Text));
+
+            List<double[]> AView = MatrixView(A);
+            List<double[]> bView = MatrixView(b);
+
+            AGrid.Columns.Clear();
             AGrid.AutoGenerateColumns = false;
+            bGrid.AutoGenerateColumns = false;
+            Binding binding;
 
             for (int i = 0; i < A.cols; i++)
             {
                 DataGridTextColumn col = new DataGridTextColumn();
-                Binding binding = new Binding("[" + i + "]");
+                binding = new Binding("[" + i + "]");
                 col.Binding = binding;
                 col.Header = "x" + (i + 1);
                 AGrid.Columns.Add(col);
             }
+            AGrid.ItemsSource = AView;
 
-            AGrid.ItemsSource = view;
-
-            //MessageBox.Show(UpperRelax(A, b, 0.00000001, 1000000).ToString());
-            //MessageBox.Show(JacobiMethod(A, b, 0.00000001, 1000000).ToString());   
+            binding = new Binding("[0]");
+            DataGridTextColumn c = bGrid.Columns[0] as DataGridTextColumn;
+            c.Binding = binding;
+            bGrid.ItemsSource = bView;
         }
     }
 }

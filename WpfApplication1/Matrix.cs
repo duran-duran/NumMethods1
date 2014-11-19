@@ -21,6 +21,22 @@ namespace WpfApplication1
         }
 
 
+        public Matrix(List<double[]> view)
+        {
+            rows = view.Count;
+            cols = view[0].Length;
+            values = new double[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    values[i, j] = view[i][j];
+                }
+            }
+        }
+
+
         public Matrix Copy()
         {
             Matrix res = new Matrix(this.rows, this.cols);
@@ -34,6 +50,39 @@ namespace WpfApplication1
             }
 
             return res;
+        }
+
+        public void Randomize(double min, double max)
+        {
+            if (max < min)
+            {
+                double tmp = max;
+                max = min;          //Своп в случае, если максимум и минимум введены в обратном порядке
+                min = tmp;
+            }
+
+            Random random = new Random();
+
+            if ((min == (int)min) && (max == (int)max))
+            {
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < cols; j++)
+                    {
+                        values[i, j] = random.Next((int)min, (int)max + 1);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < cols; j++)
+                    {
+                        values[i, j] = random.NextDouble() * (max - min) + min;
+                    }
+                }
+            }
         }
 
 

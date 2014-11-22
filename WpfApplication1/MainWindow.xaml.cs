@@ -63,8 +63,8 @@ namespace WpfApplication1
             Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);
             Matrix b = new Matrix(bGrid.ItemsSource as List<double[]>);//Как насчет оформить валидации?
 
-            double eps = 0.000000001; //Заменить на ввод с текстбокса
-            int maxN = 100000; //Заменить на ввод с текстбокса
+            double eps = Convert.ToDouble(EpsBox.Text); //Впилить валидации. Мб заменить на tryParse?
+            int maxN = Convert.ToInt32(MaxItNumBox.Text); //Впилить валидации
 
             string MethodCode = (MethodBox.SelectedItem as ComboBoxItem).Name;
 
@@ -76,11 +76,11 @@ namespace WpfApplication1
                     x = Methods.JacobiMethod(A, b, eps, maxN);
                     break;
                 case "GS":
-                    x = Methods.UpperRelax(A, b, 1, eps, maxN);
+                    x = Methods.SOR(A, b, 1, eps, maxN);
                     break;
                 case "SOR":
-                    double t = 1;//Сделать ввод параметра с помощью ползунка
-                    x = Methods.UpperRelax(A, b, t, eps, maxN);
+                    double t = tParamSlider.Value;
+                    x = Methods.SOR(A, b, t, eps, maxN);
                     break;
                 default://Чтобы не пищала ошибка про неинициализированную переменную
                     x = new Matrix(A.rows, 1);
@@ -145,6 +145,23 @@ namespace WpfApplication1
                 bGrid.ItemsSource = bView;
             }
         }
+
+        private void MCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((sender as ComboBox).SelectedIndex == 0)
+            {
+                MethodBox.Visibility = System.Windows.Visibility.Visible;
+            }
+        }
+
+        private void MethodBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (((sender as ComboBox).SelectedItem as ComboBoxItem).Name == "SOR")
+            {
+                tParamPanel.Visibility = System.Windows.Visibility.Visible;
+            }
+        }
+
        
     }
 }

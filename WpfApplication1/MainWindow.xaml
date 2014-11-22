@@ -6,25 +6,54 @@
         <TabItem>
             <TabItem.Header>Гоняем сэмпл</TabItem.Header>
             <TabItem.Content>
-                <Grid HorizontalAlignment="Left" Height="482" VerticalAlignment="Top" Width="946" Margin="0,0,-8,-20">
-                    <DataGrid x:Name="AGrid" HorizontalAlignment="Left" Margin="167,128,0,0" VerticalAlignment="Top" Height="169" Width="271">
-                    </DataGrid>
-                    <Button x:Name="SolveBtn" Content="Решить" HorizontalAlignment="Left" Margin="333,333,0,0" VerticalAlignment="Top" Width="75" Click="SolveBtn_Click"/>
-                    <DataGrid x:Name="bGrid" HorizontalAlignment="Left" Margin="443,128,0,0" VerticalAlignment="Top" Height="169" Width="92">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{x:Null}" ClipboardContentBinding="{x:Null}" Header="b"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <TextBox x:Name="DimBox" HorizontalAlignment="Left" Height="23" Margin="224,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <Grid HorizontalAlignment="Left" Height="482" VerticalAlignment="Top" Width="946" Margin="7,0,-15,-20">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="224,138,0,0" VerticalAlignment="Top">
+                        <DataGrid x:Name="AGrid" ColumnWidth="50" HeadersVisibility="Column" CanUserResizeRows="False"/>
+                        <DataGrid x:Name="bGrid" ColumnWidth="50" HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="b"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                    
+                    <Button x:Name="SolveBtn" Content="Решить cистему" HorizontalAlignment="Left" Margin="333,333,0,0" VerticalAlignment="Top" Width="75" Click="SolveBtn_Click"/>
+                    <TextBox x:Name="DimBox" Text="3" HorizontalAlignment="Left" Height="23" Margin="224,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                     <Button x:Name="CreateBtn" Content="Сгенерировать" HorizontalAlignment="Left" Margin="404,75,0,0" VerticalAlignment="Top" Width="111" Click="CreateBtn_Click"/>
-                    <TextBox x:Name="MinBox" HorizontalAlignment="Left" Height="23" Margin="224,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                    <TextBox x:Name="MaxBox" HorizontalAlignment="Left" Height="23" Margin="379,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                    <TextBox x:Name="MinBox" Text="0" HorizontalAlignment="Left" Height="23" Margin="224,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                    <TextBox x:Name="MaxBox" Text="10" HorizontalAlignment="Left" Height="23" Margin="379,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                     <Button x:Name="SolGenBtn" Content="Задать решения вручную" HorizontalAlignment="Left" Margin="553,204,0,0" VerticalAlignment="Top" Width="166" Click="SolGenBtn_Click" RenderTransformOrigin="1.08,-2.227"/>
-                    <ComboBox  x:Name="MethodBox" HorizontalAlignment="Left" Margin="596,55,0,0" VerticalAlignment="Top" Width="165">
+                    <ComboBox  x:Name="MethodBox" HorizontalAlignment="Left" Margin="636,158,0,0" VerticalAlignment="Top" Width="165" Visibility="Hidden" SelectionChanged="MethodBox_SelectionChanged">
                         <ComboBoxItem x:Name="J" IsSelected="True">Метод Якоби</ComboBoxItem>
                         <ComboBoxItem x:Name="GS">Метод Гаусса-Зейдля</ComboBoxItem>
                         <ComboBoxItem x:Name="SOR">Метод верхней релаксации</ComboBoxItem>
                     </ComboBox>
+                    <GroupBox Header="Параметры" HorizontalAlignment="Left" Margin="691,27,0,0" VerticalAlignment="Top">
+                        <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Погрешность:" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0"/>
+                            <TextBox x:Name="EpsBox" Text="0,0000001" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0" Width="85"/>
+                            <Label Content="Макс. число итераций:" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0"/>
+                            <TextBox x:Name="MaxItNumBox" Text="100000" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Column="1" Grid.Row="1" Width="85"/>
+                        </Grid>
+                    </GroupBox>
+                    <ComboBox x:Name="MCombobox" HorizontalAlignment="Left" Margin="611,122,0,0" VerticalAlignment="Top" Width="225" SelectionChanged="MCombobox_SelectionChanged">
+                        <ComboBoxItem>Неявный метод простой итерации</ComboBoxItem>
+                        <ComboBoxItem>Неявный метод скорейшего спуска</ComboBoxItem>
+                    </ComboBox>
+                    <StackPanel Name="tParamPanel" HorizontalAlignment="Left" Margin="72,313,0,0" VerticalAlignment="Top" Width="150" Visibility="Visible">
+                        <Slider Name="tParamSlider" Minimum="0.01" Maximum="1.99" TickFrequency="0.01" IsSnapToTickEnabled="True" Value="1"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Label Content="t ="/>
+                            <Label Content="{Binding ElementName=tParamSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" ContentStringFormat="F2"/>
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </TabItem.Content>
         </TabItem>

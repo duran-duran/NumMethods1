@@ -35,7 +35,7 @@ namespace WpfApplication1
         }
 
 
-        public static Matrix UpperRelax(Matrix A, Matrix b, double t, double e, int maxN) //Пофиксить согласно теории (прикрутить t)
+        public static Matrix SOR(Matrix A, Matrix b, double t, double e, int maxN) //Пофиксить согласно теории (прикрутить t)
         {
             Matrix x = new Matrix(A.rows, 1);
             Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();

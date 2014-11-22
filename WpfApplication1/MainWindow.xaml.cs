@@ -20,9 +20,8 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
-
-
-        public List<double[]> MatrixView(Matrix A)
+        //Преобразование матрицы в коллекцию для отображения в DataGrid. Стоит ли выделить в отдельный класс?
+        public static List<double[]> MatrixView(Matrix A)
         { 
             List<double[]> result = new List<double[]>();
 
@@ -52,23 +51,46 @@ namespace WpfApplication1
                 {1, 7, -2}};
             Matrix b = new Matrix(3, 1);
             b.values = new double[3, 1] { { 14 }, { -9 }, { 9 } };
-            Matrix L = A.ToLowTr();
-            Matrix M = Methods.LowTrInverse(L);
       
 
             //MessageBox.Show(UpperRelax(A, b, 0.00000001, 1000000).ToString());
             //MessageBox.Show(JacobiMethod(A, b, 0.00000001, 1000000).ToString());   
         }
 
+
         private void SolveBtn_Click(object sender, RoutedEventArgs e)
         {
-            Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);//Перегнать из гридов в матрицы
+            Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);
             Matrix b = new Matrix(bGrid.ItemsSource as List<double[]>);//Как насчет оформить валидации?
 
-            Matrix x = Methods.JacobiMethod(A, b, 0.0000001, 1000000);//Решить систему
+            double eps = 0.000000001; //Заменить на ввод с текстбокса
+            int maxN = 100000; //Заменить на ввод с текстбокса
+
+            string MethodCode = (MethodBox.SelectedItem as ComboBoxItem).Name;
+
+            Matrix x;
+
+            switch (MethodCode)
+            {
+                case "J":
+                    x = Methods.JacobiMethod(A, b, eps, maxN);
+                    break;
+                case "GS":
+                    x = Methods.UpperRelax(A, b, 1, eps, maxN);
+                    break;
+                case "SOR":
+                    double t = 1;//Сделать ввод параметра с помощью ползунка
+                    x = Methods.UpperRelax(A, b, t, eps, maxN);
+                    break;
+                default://Чтобы не пищала ошибка про неинициализированную переменную
+                    x = new Matrix(A.rows, 1);
+                    break;
+            }
+
             MessageBox.Show(x.ToString());//Вывести ответ
-            MessageBox.Show((A*x).ToString());
+            MessageBox.Show((A*x).ToString());//Проверка
         }
+
 
         private void CreateBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -102,5 +124,27 @@ namespace WpfApplication1
             c.Binding = binding;
             bGrid.ItemsSource = bView;
         }
+
+
+        private void SolGenBtn_Click(object sender, RoutedEventArgs e)
+        {
+            int dim = AGrid.Items.Count;
+            SetSolutionsDialog dlg = new SetSolutionsDialog(dim);
+            dlg.Owner = this;
+
+            dlg.ShowDialog();
+
+            if (dlg.DialogResult == true)
+            {
+                Matrix x = new Matrix(dlg.xGrid.ItemsSource as List<double[]>);
+                Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);
+                x = x.Transpose();
+                Matrix b = A * x;
+
+                List<double[]> bView = MatrixView(b);
+                bGrid.ItemsSource = bView;
+            }
+        }
+       
     }
 }

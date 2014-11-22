@@ -52,6 +52,7 @@ namespace WpfApplication1
             return res;
         }
 
+
         public void Randomize(double min, double max)
         {
             if (max < min)
@@ -193,7 +194,7 @@ namespace WpfApplication1
         }
 
 
-        public double Dot(Matrix b)
+        public double DotProduct(Matrix b)
         {
             if ((this.cols != 1) || (b.cols != 1))
                 throw new Exception("Operands are not vectors");
@@ -242,26 +243,6 @@ namespace WpfApplication1
             }
 
             return result;
-        }
-
-
-        public Matrix ToLowTr() //В методе верхней релаксации не просто нижняя треугольная, а M = L + t * D !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        {
-            if (this.rows != this.cols)
-                throw new Exception("Matrix is not square");
-
-            Matrix L = new Matrix(this.rows, this.cols);
-
-            for (int i = 0; i < this.rows; i++)
-            {
-                for (int j = 0; j < this.cols; j++)
-                {
-                    if (i >= j)
-                        L.values[i, j] = this.values[i, j];
-                }
-            }
-
-            return L;
-        }
+        } 
     }
 }

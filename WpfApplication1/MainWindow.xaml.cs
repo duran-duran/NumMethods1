@@ -94,6 +94,11 @@ namespace WpfApplication1
 
         private void CreateBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (EqSysContainer.Visibility == System.Windows.Visibility.Collapsed)  //При первой генерации показываем контейнер со СЛАУ
+            {
+                EqSysContainer.Visibility = System.Windows.Visibility.Visible;
+            }
+
             int dim = Convert.ToInt32(DimBox.Text);
             Matrix A = new Matrix(dim, dim);
             Matrix b = new Matrix(dim, 1);
@@ -148,9 +153,15 @@ namespace WpfApplication1
 
         private void MCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            SolveBtn.IsEnabled = true;//Систему можно решить, только если выбран метод
+
             if ((sender as ComboBox).SelectedIndex == 0)
             {
-                MethodBox.Visibility = System.Windows.Visibility.Visible;
+                MethodParamsContainer.Visibility = System.Windows.Visibility.Visible;
+            }
+            else
+            {
+                MethodParamsContainer.Visibility = System.Windows.Visibility.Collapsed;
             }
         }
 
@@ -159,6 +170,10 @@ namespace WpfApplication1
             if (((sender as ComboBox).SelectedItem as ComboBoxItem).Name == "SOR")
             {
                 tParamPanel.Visibility = System.Windows.Visibility.Visible;
+            }
+            else if (tParamPanel != null)//Костыль, при инициализации окна при заданном SelectedItem'e происходит вызов данного метода
+            {
+                tParamPanel.Visibility = System.Windows.Visibility.Collapsed;
             }
         }
 

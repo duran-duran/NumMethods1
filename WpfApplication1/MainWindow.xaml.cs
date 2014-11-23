@@ -44,17 +44,6 @@ namespace WpfApplication1
         public MainWindow()
         {
             InitializeComponent();
-            Matrix A = new Matrix(3, 3);    //5x1 + 3x2 + x3 = 14   x1 = 1
-            A.values = new double[3,3]{     //-2x1 + x2 - 3x3 = -9  x2 = 2
-                {5, 3, 1},                  // x1 + 7x2 - 2x3 = 9   x3 = 3
-                {-2, 1, -3},
-                {1, 7, -2}};
-            Matrix b = new Matrix(3, 1);
-            b.values = new double[3, 1] { { 14 }, { -9 }, { 9 } };
-      
-
-            //MessageBox.Show(UpperRelax(A, b, 0.00000001, 1000000).ToString());
-            //MessageBox.Show(JacobiMethod(A, b, 0.00000001, 1000000).ToString());   
         }
 
 
@@ -63,38 +52,59 @@ namespace WpfApplication1
             Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);
             Matrix b = new Matrix(bGrid.ItemsSource as List<double[]>);//Как насчет оформить валидации?
 
+            //Преобразуем систему таким образом, чтобы матрица A была симметричной и положительно определенной
+            Matrix tmp = A.Copy();
+            A = A.Transpose() * A;
+            b = tmp.Transpose() * b;
+
             double eps = Convert.ToDouble(EpsBox.Text); //Впилить валидации. Мб заменить на tryParse?
             int maxN = Convert.ToInt32(MaxItNumBox.Text); //Впилить валидации
 
-            string MethodCode = (MethodBox.SelectedItem as ComboBoxItem).Name;
+            string PreconditionerCode = (PreconditionerBox.SelectedItem as ComboBoxItem).Name;
+            string MethodCode = (MethodCombobox.SelectedItem as ComboBoxItem).Name;
 
-            Solution result;
+            Matrix M = new Matrix(A.rows, A.cols);
+            double t = 0;
+            Solution result = new Solution();
 
-            switch (MethodCode)
+            switch (PreconditionerCode)
             {
-                case "J":
-                    result = Methods.JacobiMethod(A, b, eps, maxN);
+                case "Id":
+                    M = new Matrix(A.rows, A.cols); //result = Methods.JacobiMethod(A, b, eps, maxN);
+                    M.ToIdentityMatrix();
                     break;
-                case "GS":
-                    result = Methods.SOR(A, b, 1, eps, maxN);
+                case "Diag":
+                    M = Methods.GetD(A); //result = Methods.SOR(A, b, 1, eps, maxN);
                     break;
-                case "SOR":
-                    double t = tParamSlider.Value;
-                    result = Methods.SOR(A, b, t, eps, maxN);
-                    break;
-                default://Чтобы не пищала ошибка про неинициализированную переменную
-                    result = new Solution((new Matrix(A.rows,1)),1);
+                case "LowTr":
+                    t = tParamSlider.Value;
+                    Matrix D = Methods.GetD(A); Matrix L = Methods.GetL(A); //result = Methods.SOR(A, b, t, eps, maxN);
+                    M = D + t * L;
                     break;
             }
 
-            AnswerMessage AnsMsg = new AnswerMessage(result.ToString(4), result.ItNum.ToString()); //Косяяяяяк
+            switch (MethodCode)
+            {
+                case "Jacobi":
+                    if (t == 0) //Если параметр не определен
+                    {
+                        double S = 1.15 * A.Norm(); //Некоторое число, большее нормы A. Сделать ли ввод?
+                        t = 2 / S;
+                    }
+                    result = Methods.PreconditionedJacobiMethod(A, b, M, t, eps, maxN);
+                    break;  
+                case "SteepestDescent":
+                    result = Methods.PreconditionedSteepestDescent(A, b, M, eps, maxN);
+                    break;
+            }
+
+            int digitsNum = 4; //Сделать ли ввод?
+            AnswerMessage AnsMsg = new AnswerMessage(result.ToString(digitsNum), result.ItNum.ToString()); //Косяяяяяк.
             AnsMsg.Owner = this;
 
             AnsMsg.ShowDialog();
-            //Matrix x = result.res;
-            //MessageBox.Show(result.ToString(3));//Вывести ответ
-            //MessageBox.Show(result.ItNum.ToString());
-            //MessageBox.Show((A*x).ToString());//Проверка
+            Matrix x = result.vector;
+            MessageBox.Show((tmp*x).ToString());//Проверка
         }
 
 
@@ -157,23 +167,15 @@ namespace WpfApplication1
             }
         }
 
-        private void MCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MethodCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SolveBtn.IsEnabled = true;//Систему можно решить, только если выбран метод
-
-            if ((sender as ComboBox).SelectedIndex == 0)
-            {
-                MethodParamsContainer.Visibility = System.Windows.Visibility.Visible;
-            }
-            else
-            {
-                MethodParamsContainer.Visibility = System.Windows.Visibility.Collapsed;
-            }
+            PreconditionerContainer.Visibility = System.Windows.Visibility.Visible;
         }
 
-        private void MethodBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PreconditionerBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((sender as ComboBox).SelectedItem as ComboBoxItem).Name == "SOR")
+            if (((sender as ComboBox).SelectedItem as ComboBoxItem).Name == "LowTr")
             {
                 tParamPanel.Visibility = System.Windows.Visibility.Visible;
             }

@@ -65,16 +65,16 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="MCombobox" Text="Выберите метод..." IsEditable="True" IsReadOnly="True" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="225" SelectionChanged="MCombobox_SelectionChanged">
-                                <ComboBoxItem>Неявный метод простой итерации</ComboBoxItem>
-                                <ComboBoxItem>Неявный метод скорейшего спуска</ComboBoxItem>
+                            <ComboBox x:Name="MethodCombobox" Text="Выберите метод..." IsEditable="True" IsReadOnly="True" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Width="225" SelectionChanged="MethodCombobox_SelectionChanged">
+                                <ComboBoxItem Name="Jacobi">Неявный метод простой итерации</ComboBoxItem>
+                                <ComboBoxItem Name="SteepestDescent">Неявный метод скорейшего спуска</ComboBoxItem>
                             </ComboBox>
-                            <StackPanel Name="MethodParamsContainer" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Visibility="Collapsed">
+                            <StackPanel Name="PreconditionerContainer" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Visibility="Collapsed">
                                 <Label VerticalAlignment="Center">M =</Label>
-                                <ComboBox  x:Name="MethodBox" HorizontalAlignment="Left" VerticalAlignment="Center" Width="75" SelectionChanged="MethodBox_SelectionChanged">
-                                    <ComboBoxItem x:Name="J" IsSelected="True">E</ComboBoxItem>
-                                    <ComboBoxItem x:Name="GS">L + D</ComboBoxItem>
-                                    <ComboBoxItem x:Name="SOR">D + t * L</ComboBoxItem>
+                                <ComboBox  x:Name="PreconditionerBox" HorizontalAlignment="Left" VerticalAlignment="Center" Width="75" SelectionChanged="PreconditionerBox_SelectionChanged">
+                                    <ComboBoxItem Name="Id" IsSelected="True">E</ComboBoxItem>
+                                    <ComboBoxItem Name="Diag">D</ComboBoxItem>
+                                    <ComboBoxItem Name="LowTr">D + t * L</ComboBoxItem>
                                 </ComboBox>
                                 <StackPanel Name="tParamPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed">
                                     <Slider Name="tParamSlider" Minimum="0.01" Maximum="1.99" TickFrequency="0.01" IsSnapToTickEnabled="True" Value="1" Width="100"/>

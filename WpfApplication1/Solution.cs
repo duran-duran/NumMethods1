@@ -12,6 +12,10 @@ namespace WpfApplication1
         public Matrix vector;
         public int ItNum;
 
+        public Solution()
+        {
+        }
+
         public Solution(Matrix x, int n)
         {
             vector = x.Copy();

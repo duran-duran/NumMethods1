@@ -6,28 +6,26 @@ using System.Threading.Tasks;
 
 namespace WpfApplication1
 {
-    class Methods//Необходимо пофиксить проверки на сходимость, нужна оценка погрешности результата (или смотреть невязку?)
+    class Methods
     {
-        public static Solution JacobiMethod(Matrix A, Matrix b, double e, int maxN) 
+        //Условность, принятая в обоих методах: матрица-preconditioner - нижнедиагональная
+        public static Solution PreconditionedJacobiMethod(Matrix A, Matrix b, Matrix M, double t, double e, int maxN) 
         {
             Matrix x = new Matrix(A.rows, 1);
-            Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();
 
-            Matrix tmp = A.Copy();
-            A = A.Transpose() * A;
-            b = tmp.Transpose() * b;
-            
-            double S = 1.10 * A.Norm();  //Некоторое число, большее нормы A
-            double t = 2 / S;
-
-            tmp = b.Copy();
+            Matrix tmp = b.Copy();
+            Matrix MInv = LowTrInverse(M);
+            Matrix r;
             int i;
 
             for (i = 0; i < maxN; i++)
             {
-                x = (E - t * A) * tmp + t * b;
-                if ((x - tmp).Norm() < e)
+                //B = E - t * MInv * A
+                //d = (x - tmp).Norm() / (1 - B.Norm()) - оценка погрешности. Очень странная ф-ла, т.к. знаменатель может быть меньше нуля. Мб нужна операторная норма?
+                r = A * tmp - b;
+                if (r.Norm() < e)//if ((x - tmp).Norm() < e) - сходимость по соседним решениям заменена на сходимость по невязке
                     break;
+                x = tmp - t * MInv * r;
                 tmp = x.Copy();
             }
 
@@ -35,7 +33,7 @@ namespace WpfApplication1
         }
 
         //По-хорошему надо бы все запихнуть в один метод и просто передавать параметром матрицу-preconditioner
-        public static Solution SOR(Matrix A, Matrix b, double t, double e, int maxN)
+        /*public static Solution SOR(Matrix A, Matrix b, double t, double e, int maxN)
         {
             Matrix x = new Matrix(A.rows, 1);
             Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();
@@ -60,10 +58,29 @@ namespace WpfApplication1
             }
 
             return new Solution(x, i);
-        }
+        }*/
 
-        public static void SteepestDescent(Matrix A, Matrix b)
+        public static Solution PreconditionedSteepestDescent(Matrix A, Matrix b, Matrix M, double e, int maxN)
         {
+            Matrix x = new Matrix(A.rows, 1);
+
+            Matrix tmp = b.Copy();
+            Matrix MInv = LowTrInverse(M);
+            Matrix r;
+            double t;
+            int i;
+
+            for (i = 0; i < maxN; i++)
+            {
+                r = A * tmp - b;
+                if (r.Norm() < e)//Сходимость по невязке
+                    break;
+                t = r.DotProduct(MInv * r) / ((A * MInv * r).DotProduct(MInv * r));//t = r.DotProduct(r) / ((A * r).DotProduct(r));
+                x = tmp - t * MInv * r;//x = tmp - t * r;
+                tmp = x.Copy();
+            }
+
+            return new Solution(x, i);
         }
 
         //Имеется в виду разложение матрицы A = L + D + U, гдн L содержит элементы под главной диагональю.

@@ -8,7 +8,7 @@ namespace WpfApplication1
 {
     class Methods//Необходимо пофиксить проверки на сходимость, нужна оценка погрешности результата (или смотреть невязку?)
     {
-        public static Matrix JacobiMethod(Matrix A, Matrix b, double e, int maxN) 
+        public static Solution JacobiMethod(Matrix A, Matrix b, double e, int maxN) 
         {
             Matrix x = new Matrix(A.rows, 1);
             Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();
@@ -31,15 +31,14 @@ namespace WpfApplication1
                 tmp = x.Copy();
             }
 
-            return x;
+            return new Solution(x, i);
         }
 
-
-        public static Matrix SOR(Matrix A, Matrix b, double t, double e, int maxN) //Пофиксить согласно теории (прикрутить t)
+        //По-хорошему надо бы все запихнуть в один метод и просто передавать параметром матрицу-preconditioner
+        public static Solution SOR(Matrix A, Matrix b, double t, double e, int maxN)
         {
             Matrix x = new Matrix(A.rows, 1);
             Matrix E = new Matrix(A.rows, A.cols); E.ToIdentityMatrix();
-            //t = 1;
 
             Matrix tmp = A.Copy();
             A = A.Transpose() * A;
@@ -47,8 +46,7 @@ namespace WpfApplication1
 
             Matrix L = GetL(A); Matrix D = GetD(A);
             Matrix M = D + t * L;
-            Matrix MInv = LowTrInverse(M);
-            
+            Matrix MInv = LowTrInverse(M);           
             
             tmp = b.Copy();
             int i;
@@ -61,9 +59,12 @@ namespace WpfApplication1
                 tmp = x.Copy();
             }
 
-            return x;
+            return new Solution(x, i);
         }
 
+        public static void SteepestDescent(Matrix A, Matrix b)
+        {
+        }
 
         //Имеется в виду разложение матрицы A = L + D + U, гдн L содержит элементы под главной диагональю.
         public static Matrix GetL(Matrix A)

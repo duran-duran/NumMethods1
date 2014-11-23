@@ -68,27 +68,33 @@ namespace WpfApplication1
 
             string MethodCode = (MethodBox.SelectedItem as ComboBoxItem).Name;
 
-            Matrix x;
+            Solution result;
 
             switch (MethodCode)
             {
                 case "J":
-                    x = Methods.JacobiMethod(A, b, eps, maxN);
+                    result = Methods.JacobiMethod(A, b, eps, maxN);
                     break;
                 case "GS":
-                    x = Methods.SOR(A, b, 1, eps, maxN);
+                    result = Methods.SOR(A, b, 1, eps, maxN);
                     break;
                 case "SOR":
                     double t = tParamSlider.Value;
-                    x = Methods.SOR(A, b, t, eps, maxN);
+                    result = Methods.SOR(A, b, t, eps, maxN);
                     break;
                 default://Чтобы не пищала ошибка про неинициализированную переменную
-                    x = new Matrix(A.rows, 1);
+                    result = new Solution((new Matrix(A.rows,1)),1);
                     break;
             }
 
-            MessageBox.Show(x.ToString());//Вывести ответ
-            MessageBox.Show((A*x).ToString());//Проверка
+            AnswerMessage AnsMsg = new AnswerMessage(result.ToString(4), result.ItNum.ToString()); //Косяяяяяк
+            AnsMsg.Owner = this;
+
+            AnsMsg.ShowDialog();
+            //Matrix x = result.res;
+            //MessageBox.Show(result.ToString(3));//Вывести ответ
+            //MessageBox.Show(result.ItNum.ToString());
+            //MessageBox.Show((A*x).ToString());//Проверка
         }
 
 

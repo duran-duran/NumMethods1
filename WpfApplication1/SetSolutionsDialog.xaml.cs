@@ -24,7 +24,7 @@ namespace WpfApplication1
             InitializeComponent();
 
             Matrix x = new Matrix(1, dim);
-            List<double[]> xView = MainWindow.MatrixView(x);
+            MatrixView xView = (MatrixView)x;
 
             xGrid.Columns.Clear();
             xGrid.AutoGenerateColumns = false;
@@ -39,6 +39,7 @@ namespace WpfApplication1
             }
             xGrid.ItemsSource = xView;
         }
+
 
         private void OkBtn_Click(object sender, RoutedEventArgs e)
         {

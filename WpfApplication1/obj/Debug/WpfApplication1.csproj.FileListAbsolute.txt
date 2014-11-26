@@ -41,3 +41,4 @@ D:\Projects\NumMethods1\WpfApplication1\obj\Debug\SetSolutionsDialog.baml
 D:\Projects\NumMethods1\WpfApplication1\obj\Debug\SetSolutionsDialog.g.cs
 D:\Projects\NumMethods1\WpfApplication1\obj\Debug\Answer.baml
 D:\Projects\NumMethods1\WpfApplication1\obj\Debug\Answer.g.cs
+D:\Projects\NumMethods1\WpfApplication1\obj\Debug\App.baml

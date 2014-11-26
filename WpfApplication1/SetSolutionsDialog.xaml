@@ -7,14 +7,13 @@
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition Height="35"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" HorizontalAlignment="Center">Задайте решения:</Label>
-        <DataGrid x:Name="xGrid" Grid.Row="1" ColumnWidth="50" HeadersVisibility="Column" Margin="10,0,10,0" HorizontalAlignment="Center"/>
+        <DataGrid x:Name="xGrid" Grid.Row="1" Margin="5,0,5,0" HorizontalAlignment="Center"/>
         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
-            <Button x:Name="OkBtn" Content="OK" IsDefault="True" Grid.Row="2" VerticalAlignment="Center" Width="65" Click="OkBtn_Click"/>
-            <Button x:Name="CancelBtn" Content="Отмена" IsCancel="True" VerticalAlignment="Center" Margin="5,0,0,0" Width="65"/>
-        </StackPanel>
-       
+            <Button x:Name="OkBtn" Content="OK" IsDefault="True" Grid.Row="2" Width="65" Click="OkBtn_Click"/>
+            <Button x:Name="CancelBtn" Content="Отмена" IsCancel="True" Width="65"/>
+        </StackPanel>       
     </Grid>
 </Window>

@@ -21,41 +21,35 @@ namespace WpfApplication1
     public partial class MainWindow : Window
     {
         //Преобразование матрицы в коллекцию для отображения в DataGrid. Стоит ли выделить в отдельный класс?
-        public static List<double[]> MatrixView(Matrix A)
-        { 
-            List<double[]> result = new List<double[]>();
-
-            for (int i = 0; i < A.rows; i++)
-            {
-                double[] row = new double[A.cols];
-
-                for (int j = 0; j < A.cols; j++)
-                {
-                    row[j] = A.values[i, j];
-                }
-
-                result.Add(row);
-            }
-
-            return result;
-        }
-
-
         public MainWindow()
         {
             InitializeComponent();
+            //Всякая херня для тестирования
+            /*Matrix A = new Matrix(3,3);
+            A.Randomize(1, 10);
+            Matrix E = A.Copy();
+            E.ToIdentityMatrix();
+
+            MessageBox.Show(A.ToString());
+            MessageBox.Show(E.ToString());
+            MessageBox.Show(Methods.LowTrInverse(E).ToString());
+            Matrix D = Methods.GetD(A);
+            Matrix L = Methods.GetL(A);
+            Matrix M = D + L;
+            Matrix MInv = Methods.LowTrInverse(M);
+
+            MessageBox.Show(M.ToString());
+            MessageBox.Show(MInv.ToString());
+            MessageBox.Show((M * MInv).ToString());
+            MessageBox.Show((MInv * M).ToString());*/
+
         }
 
 
         private void SolveBtn_Click(object sender, RoutedEventArgs e)
         {
-            Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);
-            Matrix b = new Matrix(bGrid.ItemsSource as List<double[]>);//Как насчет оформить валидации?
-
-            //Преобразуем систему таким образом, чтобы матрица A была симметричной и положительно определенной
-            Matrix tmp = A.Copy();
-            A = A.Transpose() * A;
-            b = tmp.Transpose() * b;
+            Matrix A = (Matrix)(AGrid.ItemsSource as MatrixView);
+            Matrix b = (Matrix)(bGrid.ItemsSource as MatrixView);
 
             double eps = Convert.ToDouble(EpsBox.Text); //Впилить валидации. Мб заменить на tryParse?
             int maxN = Convert.ToInt32(MaxItNumBox.Text); //Впилить валидации
@@ -63,22 +57,34 @@ namespace WpfApplication1
             string PreconditionerCode = (PreconditionerBox.SelectedItem as ComboBoxItem).Name;
             string MethodCode = (MethodCombobox.SelectedItem as ComboBoxItem).Name;
 
+            bool IsTransformNeeded = (bool)SysTransformFlag.IsChecked;
+
+            Matrix tmp = A.Copy();
+            //Преобразуем систему таким образом, чтобы матрица A была симметричной и положительно определенной
+            if (IsTransformNeeded)
+            {
+                A = A.Transpose() * A;        //Для матриц с диагональным преобладанием данное преобразование только мешает. (В частности, метод Якоби с диагональным прекондишнером расходиться
+                b = tmp.Transpose() * b;
+            }
+            
             Matrix M = new Matrix(A.rows, A.cols);
             double t = 0;
             Solution result = new Solution();
 
+            //Как-то странно у меня получается с выбором прекондиционера и подгоном t в методе Якоби. По идее, должно быть что-то одно
             switch (PreconditionerCode)
             {
                 case "Id":
-                    M = new Matrix(A.rows, A.cols); //result = Methods.JacobiMethod(A, b, eps, maxN);
+                    M = new Matrix(A.rows, A.cols);
                     M.ToIdentityMatrix();
                     break;
                 case "Diag":
-                    M = Methods.GetD(A); //result = Methods.SOR(A, b, 1, eps, maxN);
+                    M = Methods.GetD(A); //диагональный прекондиционер для Якоби как-то не канает, только для матриц с диагональным преобладанием
+                    t = 1; // Экспериментирую
                     break;
                 case "LowTr":
                     t = tParamSlider.Value;
-                    Matrix D = Methods.GetD(A); Matrix L = Methods.GetL(A); //result = Methods.SOR(A, b, t, eps, maxN);
+                    Matrix D = Methods.GetD(A); Matrix L = Methods.GetL(A);
                     M = D + t * L;
                     break;
             }
@@ -89,7 +95,7 @@ namespace WpfApplication1
                     if (t == 0) //Если параметр не определен
                     {
                         double S = 1.15 * A.Norm(); //Некоторое число, большее нормы A. Сделать ли ввод?
-                        t = 2 / S;
+                        t = 2 / S; //Для диагонального прекондишнера данное тау - полная хрень бтв.
                     }
                     result = Methods.PreconditionedJacobiMethod(A, b, M, t, eps, maxN);
                     break;  
@@ -116,14 +122,15 @@ namespace WpfApplication1
             }
 
             int dim = Convert.ToInt32(DimBox.Text);
+            bool isDiagDom = (bool)DiagDomFlag.IsChecked;
             Matrix A = new Matrix(dim, dim);
             Matrix b = new Matrix(dim, 1);
 
-            A.Randomize(Convert.ToDouble(MinBox.Text), Convert.ToDouble(MaxBox.Text));  //Как насчет оформить валидации?
-            b.Randomize(Convert.ToDouble(MinBox.Text), Convert.ToDouble(MaxBox.Text));
+            A.Randomize(Convert.ToDouble(MinBox.Text), Convert.ToDouble(MaxBox.Text), isDiagDom);  //Как насчет оформить валидации?
+            b.Randomize(Convert.ToDouble(MinBox.Text), Convert.ToDouble(MaxBox.Text), false);
 
-            List<double[]> AView = MatrixView(A);
-            List<double[]> bView = MatrixView(b);
+            MatrixView AView = (MatrixView)A;
+            MatrixView bView = (MatrixView)b;
 
             AGrid.Columns.Clear();
             AGrid.AutoGenerateColumns = false;
@@ -157,21 +164,23 @@ namespace WpfApplication1
 
             if (dlg.DialogResult == true)
             {
-                Matrix x = new Matrix(dlg.xGrid.ItemsSource as List<double[]>);
-                Matrix A = new Matrix(AGrid.ItemsSource as List<double[]>);
+                Matrix x = (Matrix)(dlg.xGrid.ItemsSource as MatrixView);
+                Matrix A = (Matrix)(AGrid.ItemsSource as MatrixView);
                 x = x.Transpose();
                 Matrix b = A * x;
 
-                List<double[]> bView = MatrixView(b);
+                MatrixView bView = (MatrixView)b;
                 bGrid.ItemsSource = bView;
             }
         }
+
 
         private void MethodCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SolveBtn.IsEnabled = true;//Систему можно решить, только если выбран метод
             PreconditionerContainer.Visibility = System.Windows.Visibility.Visible;
         }
+
 
         private void PreconditionerBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -184,7 +193,5 @@ namespace WpfApplication1
                 tParamPanel.Visibility = System.Windows.Visibility.Collapsed;
             }
         }
-
-       
     }
 }

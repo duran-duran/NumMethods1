@@ -77,7 +77,7 @@ namespace WpfApplication1
                         absRowSum += Math.Abs(values[i, j]); //Важный момент - суммируются модули
                     }
                     if (IsDiagDom)
-                        values[i, i] = absRowSum;
+                        values[i, i] = absRowSum;   //Надо бы проверку на квадратность тогда уж впилить
                 }
             }
             else

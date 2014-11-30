@@ -17,13 +17,15 @@ namespace WpfApplication1
             Matrix x = b.Copy();
             Matrix r;
             int i;
+            List<double> residual = new List<double>();
 
             for (i = 0; i < maxN; i++)
             {
                 //B = E - t * MInv * A
                 //d = (x - tmp).Norm() / (1 - B.Norm()) - оценка погрешности. Очень странная ф-ла, т.к. знаменатель может быть меньше нуля. Мб нужна операторная норма?
-                r = A * x - b;       
-                if (r.Norm() < e)
+                r = A * x - b;
+                residual.Add(r.Norm());
+                if (residual[i] < e)
                     break;
                 //tmp = x.Copy();
                 x = x - t * MInv * r;
@@ -31,7 +33,7 @@ namespace WpfApplication1
                 //break;
             }
 
-            return new Solution(x, i);
+            return new Solution(x, i, residual);
         }
 
         public static Solution PreconditionedSteepestDescent(Matrix A, Matrix b, Matrix M, double e, int maxN)
@@ -43,11 +45,13 @@ namespace WpfApplication1
             Matrix r;
             double t;
             int i;
+            List<double> residual = new List<double>();
 
             for (i = 0; i < maxN; i++)
             {
                 r = A * x - b;
-                if (r.Norm() < e)//Сходимость по невязке
+                residual.Add(r.Norm());
+                if (residual[i] < e)//Сходимость по невязке
                     break;
                 t = r.DotProduct(MInv * r) / ((A * MInv * r).DotProduct(MInv * r));
                 //tmp = x.Copy();
@@ -56,7 +60,7 @@ namespace WpfApplication1
                 //break;
             }
 
-            return new Solution(x, i);
+            return new Solution(x, i, residual);
         }
 
         //Имеется в виду разложение матрицы A = L + D + U, гдн L содержит элементы под главной диагональю.
@@ -69,7 +73,7 @@ namespace WpfApplication1
 
             for (int i = 0; i < A.rows; i++)
             {
-                for (int j = 0; j < i; j++) //Влез косяк: брались еще диагональные элементы
+                for (int j = 0; j < i; j++)
                 {
                     L.values[i, j] = A.values[i, j];
                 }

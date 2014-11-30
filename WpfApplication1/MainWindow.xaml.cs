@@ -21,7 +21,6 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
-        //Преобразование матрицы в коллекцию для отображения в DataGrid. Стоит ли выделить в отдельный класс?
         public MainWindow()
         {
             InitializeComponent();
@@ -105,12 +104,12 @@ namespace WpfApplication1
             }
 
             int digitsNum = 4; //Сделать ли ввод?
-            AnswerMessage AnsMsg = new AnswerMessage(result.ToString(digitsNum), result.ItNum.ToString()); //Косяяяяяк.
+            AnswerMessage AnsMsg = new AnswerMessage(result.ToString(digitsNum), result.ItNum.ToString(), result.residual); //Косяяяяяк.
             AnsMsg.Owner = this;
 
             AnsMsg.ShowDialog();
-            Matrix x = result.vector;
-            MessageBox.Show((tmp*x).ToString());//Проверка
+            //Matrix x = result.vector;
+            //MessageBox.Show((tmp*x).ToString());//Проверка
         }
 
 
@@ -178,6 +177,7 @@ namespace WpfApplication1
         private void MethodCombobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SolveBtn.IsEnabled = true;//Систему можно решить, только если выбран метод
+            StartBtn.IsEnabled = true;//Вообще говоря, данные манипуляции - полное говно. По-хорошему, нужно делать чек уже при клике
             PreconditionerContainer.Visibility = System.Windows.Visibility.Visible;
         }
 
@@ -196,6 +196,9 @@ namespace WpfApplication1
 
         private void StartBtn_Click(object sender, RoutedEventArgs e) //Это какой-то лютый говнокод (в замле тоже самое). Не хочешь ли переделать?
         {
+            if (ChartContainer.Visibility == System.Windows.Visibility.Collapsed)
+                ChartContainer.Visibility = System.Windows.Visibility.Visible;
+
             double eps = Convert.ToDouble(EpsBox.Text); //Впилить валидации. Мб заменить на tryParse?
             int maxN = Convert.ToInt32(MaxItNumBox.Text); //Впилить валидации
 
@@ -220,9 +223,13 @@ namespace WpfApplication1
             Matrix M;
             double t;
 
+            int itSum; long timeSum;
+
+            long time_before; long time_after;
+
             Solution result = new Solution();
 
-            int[] dimSigns = new int[finishDim - startDim + 1];
+            int[] dimChartSigns = new int[finishDim - startDim + 1];
 
             for (int dim = startDim; dim < finishDim + 1; dim++)
             {
@@ -232,8 +239,8 @@ namespace WpfApplication1
                 M = new Matrix(dim, dim);
                 t = 0;
 
-                int itSum = 0;
-                long timeSum = 0;
+                itSum = 0;
+                timeSum = 0;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -264,7 +271,7 @@ namespace WpfApplication1
                             break;
                     }
 
-                    long time_before = DateTime.Now.Ticks;
+                    time_before = DateTime.Now.Ticks;
 
                     switch (MethodCode)
                     {
@@ -281,37 +288,32 @@ namespace WpfApplication1
                             break;
                     }
 
-                    long time_after = DateTime.Now.Ticks;
+                    time_after = DateTime.Now.Ticks;
 
                     itSum += result.ItNum;
                     timeSum += (time_after - time_before);
                 }
 
-                dimSigns[dim - startDim] = dim;
+                dimChartSigns[dim - startDim] = dim;
                 iterations[dim - startDim] = (int)Math.Floor((double)(itSum / count));
-                time[dim - startDim] = (int)Math.Floor((double)((timeSum / count) / 10000)); //Переводим такты в миллисекунды
+                time[dim - startDim] = (int)Math.Floor((double)((timeSum / count) / 10)); //Переводим такты в микросекунды
             }
             
             //Сделать кнопку сброса для графиков + комбо-бокс для разных графиков (надо ли?)
 
-            Series iterations_series = new Series();
+            Series iterations_series = new Series();    //Написал на всякий отдельный класс ChartHelper. Хз, надо ли вообще.
             iterations_series.ChartType = SeriesChartType.Line;
-            iterations_series.Points.DataBindXY(dimSigns, iterations);
+            iterations_series.Points.DataBindXY(dimChartSigns, iterations);
             StatsChart.Series.Add(iterations_series);
             iterations_series.ChartArea = "Iterations";
 
             Series time_series = new Series();
             time_series.ChartType = SeriesChartType.Line;
-            time_series.Points.DataBindXY(dimSigns, time);
+            time_series.Points.DataBindXY(dimChartSigns, time);
             StatsChart.Series.Add(time_series);
             time_series.ChartArea = "Time";
-
-            /*Chart.Series.Add(new Series("Series2"));
-            Chart.Series["Series2"].ChartType = SeriesChartType.Line;
-            Chart.Series["Series2"].Points.DataBindXY(dimSigns2, iterations2);*/
-
-
         }
+
 
         private void WFHost_Loaded(object sender, RoutedEventArgs e)
         {
@@ -322,6 +324,12 @@ namespace WpfApplication1
             StatsChart.ChartAreas.Add(new ChartArea("Time"));
             StatsChart.ChartAreas["Time"].AxisX.Title = "Dimension";
             StatsChart.ChartAreas["Time"].AxisY.Title = "Time";
+        }
+
+
+        private void ResetChartsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            StatsChart.Series.Clear();
         }
     }
 }

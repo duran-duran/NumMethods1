@@ -59,6 +59,7 @@
     <Compile Include="Answer.xaml.cs">
       <DependentUpon>Answer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ChartHelper.cs" />
     <Compile Include="MatrixView.cs" />
     <Compile Include="SetSolutionsDialog.xaml.cs">
       <DependentUpon>SetSolutionsDialog.xaml</DependentUpon>

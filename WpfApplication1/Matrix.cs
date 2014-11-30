@@ -216,7 +216,7 @@ namespace WpfApplication1
             double sum = 0;
 
             for (int i = 0; i < this.rows; i++)
-                sum += this.values[i, 0] * b.values[i, 0];   //Нихуя себе косячок тут был: умножал сам на себя.
+                sum += this.values[i, 0] * b.values[i, 0];
 
             return sum;
         }

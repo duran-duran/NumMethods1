@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:wfchart="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         Title="Итерационные методы решения СЛАУ"
         SizeToContent="WidthAndHeight"
-        ResizeMode="NoResize"
-        xmlns:wfchart="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization">
+        ResizeMode="NoResize">
     
         <Grid>
             <Grid.RowDefinitions>
@@ -137,8 +137,12 @@
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
-                            <Button x:Name="StartBtn" Content="Провести серию экспериментов" HorizontalAlignment="Center" Click="StartBtn_Click"/>
-                            <WindowsFormsHost HorizontalAlignment="Center" Loaded="WFHost_Loaded">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button x:Name="StartBtn" Content="Провести серию экспериментов" Click="StartBtn_Click" IsEnabled="False"/>
+                                <Button x:Name="ResetChartsBtn" Content="Сброс" Width="60" Click="ResetChartsBtn_Click"/>
+                            </StackPanel>
+                            
+                            <WindowsFormsHost x:Name="ChartContainer" HorizontalAlignment="Center" Loaded="WFHost_Loaded" Visibility="Collapsed">
                                 <wfchart:Chart x:Name="StatsChart" Width="800" Height="500"/>
                             </WindowsFormsHost>
                         </StackPanel>                

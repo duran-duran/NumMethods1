@@ -11,15 +11,17 @@ namespace WpfApplication1
     {
         public Matrix vector;
         public int ItNum;
+        public List<double> residual;
 
         public Solution()
         {
         }
 
-        public Solution(Matrix x, int n)
+        public Solution(Matrix x, int n, List<double> r)
         {
             vector = x.Copy();
             ItNum = n;
+            residual = r;
         }
 
         //Внутренний цикл по идее не нужен, т.к. решение - это всегда вектор-столбец.
